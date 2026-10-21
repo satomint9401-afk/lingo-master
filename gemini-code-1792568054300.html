@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LingoMaster Pro - Có Thi Thử</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --secondary: #06b6d4;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg); color: var(--text-main); padding-bottom: 90px; max-width: 600px; margin: 0 auto; min-height: 100vh; }
+
+        header { background: var(--card-bg); padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+        .logo { font-size: 20px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .lang-switch { background: var(--bg); border: 1px solid var(--border); padding: 4px; border-radius: 30px; display: flex; gap: 4px; }
+        .lang-btn { border: none; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; cursor: pointer; background: transparent; color: var(--text-sub); transition: 0.2s; }
+        .lang-btn.active { background: var(--primary); color: white; }
+
+        .topic-bar { padding: 12px 20px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; background: var(--card-bg); border-bottom: 1px solid var(--border); }
+        .topic-bar::-webkit-scrollbar { display: none; }
+        .topic-chip { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 700; color: var(--text-sub); white-space: nowrap; cursor: pointer; transition: 0.2s; }
+        .topic-chip.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
+        .dashboard { padding: 16px 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .dash-card { background: var(--card-bg); padding: 12px 8px; border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center; box-shadow: var(--shadow); }
+        .dash-val { font-size: 18px; font-weight: 800; color: var(--primary); }
+        .dash-lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; font-weight: 600; }
+
+        .main-container { padding: 0 20px; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* Flashcard */
+        .flashcard-wrapper { perspective: 1000px; height: 320px; margin-bottom: 20px; }
+        .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .flashcard.flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: var(--card-bg); border-radius: var(--radius-lg); border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; box-shadow: var(--shadow); }
+        .card-back { transform: rotateY(180deg); background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%); }
+        .word-badge { background: var(--primary-light); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
+        .word-main { font-size: 36px; font-weight: 800; margin-bottom: 6px; }
+        .word-phonetic { font-size: 16px; color: var(--text-sub); font-weight: 500; margin-bottom: 20px; }
+        .card-actions { display: flex; gap: 12px; }
+        .icon-btn { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--border); background: var(--card-bg); display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; transition: 0.2s; }
+        .icon-btn:hover { background: var(--primary-light); color: var(--primary); }
+
+        .srs-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+        .btn { padding: 14px; border-radius: var(--radius-md); border: none; font-weight: 700; cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        /* Quiz & Exam */
+        .quiz-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow); text-align: center; }
+        .quiz-q { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+        .opts-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .opt-btn { padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg); font-weight: 600; text-align: left; cursor: pointer; transition: 0.2s; }
+        .opt-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+
+        .timer-box { font-size: 18px; font-weight: 800; color: var(--danger); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+        /* Vocab Manager */
+        .add-form { background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
+        .form-input { width: 100%; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 10px; font-size: 14px; }
+
+        /* Navigation */
+        nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+        .nav-item { border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-sub); font-size: 11px; font-weight: 700; cursor: pointer; width: 20%; }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">🌐 LingoMaster</div>
+        <div class="lang-switch">
+            <button class="lang-btn active" id="btnEN" onclick="switchLang('en')">EN 🇬🇧</button>
+            <button class="lang-btn" id="btnZH" onclick="switchLang('zh')">ZH 🇨🇳</button>
+        </div>
+    </header>
+
+    <div class="topic-bar" id="topicBar"></div>
+
+    <div class="dashboard">
+        <div class="dash-card">
+            <div class="dash-val" id="streakVal">🔥 1</div>
+            <div class="dash-lbl">Chuỗi Ngày</div>
+        </div>
+        <div class="dash-card">
+            <div class="dash-val" id="xpVal">⚡ 0</div>
+            <div class="dash-lbl">Điểm XP</div>
+        </div>
+        <div class="dash-card">
+            <div class="dash-val" id="srsVal">📚 0</div>
+            <div class="dash-lbl">Thuộc SRS</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- FLASHCARD -->
+        <div id="viewFlashcard" class="view-section active">
+            <div class="flashcard-wrapper" onclick="flipCard()">
+                <div class="flashcard" id="card">
+                    <div class="card-face card-front">
+                        <span class="word-badge" id="cardTopicBadge">Chủ đề</span>
+                        <div class="word-main" id="cardWord">Word</div>
+                        <div class="word-phonetic" id="cardPhonetic">/phonetic/</div>
+                        <div class="card-actions">
+                            <button class="icon-btn" onclick="speakWord(event)">🔊</button>
+                            <button class="icon-btn" onclick="micListen(event)">🎙️</button>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--primary); margin-bottom: 12px;" id="cardMeaning">Nghĩa</div>
+                        <div style="font-size: 14px; color: var(--text-sub); font-style: italic;" id="cardExample">"Ví dụ"</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="srs-controls">
+                <button class="btn btn-danger" onclick="srsAnswer(false)">❌ Chưa thuộc</button>
+                <button class="btn btn-success" onclick="srsAnswer(true)">✅ Đã thuộc</button>
+            </div>
+        </div>
+
+        <!-- THI THỬ (EXAM MODE) -->
+        <div id="viewExam" class="view-section">
+            <div class="quiz-card" id="examStartBox">
+                <h2 style="margin-bottom: 12px; color: var(--primary);">📝 BÀI THI THỬ TỔNG HỢP</h2>
+                <p style="color: var(--text-sub); margin-bottom: 20px; font-size: 14px;">
+                    Bài thi bao gồm 5 câu hỏi ngẫu nhiên từ tủ từ vựng của bạn.<br>Thời gian làm bài: <strong>60 giây</strong>.
+                </p>
+                <button class="btn btn-primary" style="width: 100%;" onclick="startExam()">🔥 Bắt Đầu Thi Ngay</button>
+            </div>
+
+            <div class="quiz-card" id="examBox" style="display: none;">
+                <div class="timer-box" id="examTimer">⏱️ 60s</div>
+                <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 10px;" id="examProgress">Câu 1/5</div>
+                <div class="quiz-q" id="examQ">Câu hỏi...</div>
+                <div class="opts-grid" id="examOpts"></div>
+            </div>
+
+            <div class="quiz-card" id="examResultBox" style="display: none;">
+                <h2 style="margin-bottom: 12px;" id="examResultTitle">🎉 KẾT QUẢ BÀI THI</h2>
+                <div style="font-size: 36px; font-weight: 800; color: var(--primary); margin-bottom: 8px;" id="examScore">4/5</div>
+                <p style="color: var(--text-sub); margin-bottom: 20px;" id="examFeedback">Chúc mừng! Bạn đã hoàn thành xuất sắc bài thi.</p>
+                <button class="btn btn-primary" style="width: 100%;" onclick="resetExam()">🔄 Thi Lại Bài Khác</button>
+            </div>
+        </div>
+
+        <!-- VOCABULARY MANAGER -->
+        <div id="viewVocab" class="view-section">
+            <div class="add-form">
+                <h3 style="margin-bottom: 12px; font-size: 16px;">➕ Thêm từ mới theo chủ đề</h3>
+                <input type="text" class="form-input" id="newWord" placeholder="Từ mới (Ví dụ: Airport hoặc 机场)">
+                <input type="text" class="form-input" id="newPhonetic" placeholder="Phiên âm (Ví dụ: /ˈeə.pɔːt/ hoặc jīchǎng)">
+                <input type="text" class="form-input" id="newMeaning" placeholder="Nghĩa Tiếng Việt (Ví dụ: Sân bay)">
+                <input type="text" class="form-input" id="newExample" placeholder="Ví dụ minh họa">
+                <select class="form-input" id="newTopicSelect"></select>
+                <button class="btn btn-primary" style="width: 100%;" onclick="addNewWord()">Lưu Từ Mới</button>
+            </div>
+            <div id="vocabList"></div>
+        </div>
+    </div>
+
+    <nav>
+        <button class="nav-item active" onclick="showTab('Flashcard')">
+            <span class="nav-icon">🎴</span>
+            <span>Flashcard</span>
+        </button>
+        <button class="nav-item" onclick="showTab('Exam')">
+            <span class="nav-icon">📝</span>
+            <span>Thi Thử</span>
+        </button>
+        <button class="nav-item" onclick="showTab('Vocab')">
+            <span class="nav-icon">📚</span>
+            <span>Tủ Từ</span>
+        </button>
+    </nav>
+
+    <script>
+        const topicsConfig = {
+            en: ["Tất cả", "Du lịch & Sân bay", "Công sở & Sự nghiệp", "Giao tiếp hàng ngày", "Ẩm thực & Nhà hàng"],
+            zh: ["Tất cả", "基础 Giao tiếp", "购物 Mua sắm", "旅游 Du lịch", "美食 Ẩm thực"]
+        };
+
+        const defaultVocabulary = {
+            en: [
+                { word: "Flight", phonetic: "/flaɪt/", meaning: "Chuyến bay", example: "My flight is at 9 AM.", topic: "Du lịch & Sân bay", box: 1 },
+                { word: "Boarding Pass", phonetic: "/ˈbɔː.dɪŋ ˌpɑːs/", meaning: "Thẻ lên máy bay", example: "Please show your boarding pass.", topic: "Du lịch & Sân bay", box: 1 },
+                { word: "Deadline", phonetic: "/ˈded.laɪn/", meaning: "Hạn chót", example: "We must finish before the deadline.", topic: "Công sở & Sự nghiệp", box: 1 },
+                { word: "Negotiate", phonetic: "/nəˈɡəʊ.ʃi.eɪt/", meaning: "Đàm phán / Thương lượng", example: "We need to negotiate the price.", topic: "Công sở & Sự nghiệp", box: 1 },
+                { word: "Opportunity", phonetic: "/ˌɒp.əˈtʃuː.nə.ti/", meaning: "Cơ hội", example: "Don't miss this opportunity.", topic: "Giao tiếp hàng ngày", box: 1 },
+                { word: "Delicious", phonetic: "/dɪˈlɪʃ.əs/", meaning: "Thơm ngon", example: "This pizza is delicious!", topic: "Ẩm thực & Nhà hàng", box: 1 }
+            ],
+            zh: [
+                { word: "你好", phonetic: "Nǐ hǎo", meaning: "Xin chào", example: "你好，很高兴认识你！", topic: "基础 Giao tiếp", box: 1 },
+                { word: "谢谢", phonetic: "Xièxie", meaning: "Cảm ơn", example: "非常谢谢你的帮助。", topic: "基础 Giao tiếp", box: 1 },
+                { word: "多少钱", phonetic: "Duōshǎo qián", meaning: "Bao nhiêu tiền", example: "这个一共多少钱？", topic: "购物 Mua sắm", box: 1 },
+                { word: "便宜点", phonetic: "Piányí diǎn", meaning: "Rẻ hơn một chút", example: "老板，能便宜点吗？", topic: "购物 Mua sắm", box: 1 },
+                { word: "机场", phonetic: "Jīchǎng", meaning: "Sân bay", example: "我要去首都机场。", topic: "旅游 Du lịch", box: 1 },
+                { word: "好吃", phonetic: "Hǎochī", meaning: "Ngon miệng", example: "中国菜很好吃。", topic: "美食 Ẩm thực", box: 1 }
+            ]
+        };
+
+        let currentLang = 'en';
+        let currentTopic = 'Tất cả';
+        let currentIndex = 0;
+        let xp = parseInt(localStorage.getItem('lingo_xp') || '0');
+        let vocabData = JSON.parse(localStorage.getItem('lingo_vocab')) || defaultVocabulary;
+
+        // Biến phục vụ thi thử
+        let examQuestions = [];
+        let examCurrentIdx = 0;
+        let examScore = 0;
+        let examTimerInterval = null;
+        let examTimeLeft = 60;
+
+        function saveStorage() {
+            localStorage.setItem('lingo_vocab', JSON.stringify(vocabData));
+            localStorage.setItem('lingo_xp', xp.toString());
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            document.getElementById('xpVal').textContent = `⚡ ${xp}`;
+            const learnedCount = vocabData[currentLang].filter(v => v.box > 1).length;
+            document.getElementById('srsVal').textContent = `📚 ${learnedCount}`;
+        }
+
+        function renderTopics() {
+            const container = document.getElementById('topicBar');
+            container.innerHTML = '';
+            const topics = topicsConfig[currentLang];
+            
+            topics.forEach(t => {
+                const chip = document.createElement('div');
+                chip.className = `topic-chip ${t === currentTopic ? 'active' : ''}`;
+                chip.textContent = t;
+                chip.onclick = () => {
+                    currentTopic = t;
+                    currentIndex = 0;
+                    renderTopics();
+                    renderCard();
+                };
+                container.appendChild(chip);
+            });
+
+            const select = document.getElementById('newTopicSelect');
+            select.innerHTML = '';
+            topics.filter(t => t !== 'Tất cả').forEach(t => {
+                select.innerHTML += `<option value="${t}">${t}</option>`;
+            });
+        }
+
+        function getFilteredList() {
+            const list = vocabData[currentLang];
+            if (currentTopic === 'Tất cả') return list;
+            return list.filter(item => item.topic === currentTopic);
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            currentTopic = 'Tất cả';
+            currentIndex = 0;
+            document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+            document.getElementById('btnZH').classList.toggle('active', lang === 'zh');
+            renderTopics();
+            renderCard();
+            updateDashboard();
+        }
+
+        function renderCard() {
+            const list = getFilteredList();
+            if (!list || list.length === 0) {
+                document.getElementById('cardWord').textContent = "Chưa có từ";
+                document.getElementById('cardPhonetic').textContent = "";
+                document.getElementById('cardMeaning').textContent = "Hãy thêm từ vào chủ đề này!";
+                document.getElementById('cardExample').textContent = "";
+                document.getElementById('cardTopicBadge').textContent = currentTopic;
+                return;
+            }
+            
+            if (currentIndex >= list.length) currentIndex = 0;
+            const item = list[currentIndex];
+
+            document.getElementById('card').classList.remove('flipped');
+            document.getElementById('cardWord').textContent = item.word;
+            document.getElementById('cardPhonetic').textContent = item.phonetic;
+            document.getElementById('cardMeaning').textContent = item.meaning;
+            document.getElementById('cardExample').textContent = `"${item.example}"`;
+            document.getElementById('cardTopicBadge').textContent = item.topic || currentTopic;
+        }
+
+        function flipCard() {
+            document.getElementById('card').classList.toggle('flipped');
+        }
+
+        function speakWord(e) {
+            if (e) e.stopPropagation();
+            const list = getFilteredList();
+            if (!list.length) return;
+            const item = list[currentIndex];
+            const utterance = new SpeechSynthesisUtterance(item.word);
+            utterance.lang = currentLang === 'en' ? 'en-US' : 'zh-CN';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function micListen(e) {
+            if (e) e.stopPropagation();
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Trình duyệt không hỗ trợ nhận diện giọng nói.");
+                return;
+            }
+            const list = getFilteredList();
+            if (!list.length) return;
+
+            const rec = new webkitSpeechRecognition();
+            rec.lang = currentLang === 'en' ? 'en-US' : 'zh-CN';
+            rec.onstart = () => alert("🎙️ Đang nghe... Hãy phát âm từ này!");
+            rec.onresult = (event) => {
+                const spoken = event.results[0][0].transcript.toLowerCase();
+                const target = list[currentIndex].word.toLowerCase();
+                if (spoken.includes(target) || target.includes(spoken)) {
+                    alert(`✅ Chuẩn xác! Bạn nói: "${spoken}" (+10 XP)`);
+                    xp += 10;
+                    saveStorage();
+                } else {
+                    alert(`❌ Chưa đúng. Bạn đã nói: "${spoken}"`);
+                }
+            };
+            rec.start();
+        }
+
+        function srsAnswer(isCorrect) {
+            const list = getFilteredList();
+            if (!list.length) return;
+
+            if (isCorrect) {
+                list[currentIndex].box = Math.min(5, (list[currentIndex].box || 1) + 1);
+                xp += 15;
+            } else {
+                list[currentIndex].box = 1;
+            }
+            saveStorage();
+            currentIndex = (currentIndex + 1) % list.length;
+            renderCard();
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(`view${tab}`).classList.add('active');
+
+            if (tab === 'Vocab') renderVocabList();
+        }
+
+        /* LOGIC THI THỬ (EXAM) */
+        function startExam() {
+            const list = vocabData[currentLang];
+            if (list.length < 3) {
+                alert("Bạn cần có ít nhất 3 từ vựng trong tủ từ để bắt đầu bài thi thử!");
+                return;
+            }
+
+            examQuestions = [...list].sort(() => Math.random() - 0.5).slice(0, 5);
+            examCurrentIdx = 0;
+            examScore = 0;
+            examTimeLeft = 60;
+
+            document.getElementById('examStartBox').style.display = 'none';
+            document.getElementById('examResultBox').style.display = 'none';
+            document.getElementById('examBox').style.display = 'block';
+
+            startExamTimer();
+            renderExamQuestion();
+        }
+
+        function startExamTimer() {
+            clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(() => {
+                examTimeLeft--;
+                document.getElementById('examTimer').textContent = `⏱️ ${examTimeLeft}s`;
+                if (examTimeLeft <= 0) {
+                    clearInterval(examTimerInterval);
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function renderExamQuestion() {
+            if (examCurrentIdx >= examQuestions.length) {
+                clearInterval(examTimerInterval);
+                finishExam();
+                return;
+            }
+
+            const currentQ = examQuestions[examCurrentIdx];
+            document.getElementById('examProgress').textContent = `Câu ${examCurrentIdx + 1}/${examQuestions.length}`;
+            document.getElementById('examQ').textContent = `Nghĩa của từ "${currentQ.word}" là gì?`;
+
+            let opts = [currentQ.meaning];
+            const fullList = vocabData[currentLang];
+            while (opts.length < 3 && fullList.length > 1) {
+                let rand = fullList[Math.floor(Math.random() * fullList.length)].meaning;
+                if (!opts.includes(rand)) opts.push(rand);
+            }
+            opts.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('examOpts');
+            grid.innerHTML = '';
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.textContent = opt;
+                btn.onclick = () => {
+                    if (opt === currentQ.meaning) {
+                        examScore++;
+                    }
+                    examCurrentIdx++;
+                    renderExamQuestion();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function finishExam() {
+            document.getElementById('examBox').style.display = 'none';
+            document.getElementById('examResultBox').style.display = 'block';
+
+            const scorePercent = (examScore / examQuestions.length) * 100;
+            document.getElementById('examScore').textContent = `${examScore}/${examQuestions.length} (${scorePercent}%)`;
+
+            if (scorePercent >= 80) {
+                document.getElementById('examResultTitle').textContent = "🎉 XUẤT SẮC! BẠN ĐÃ ĐẠT";
+                document.getElementById('examFeedback').textContent = "Bạn nắm rất vững từ vựng! Đã cộng +50 XP thưởng.";
+                xp += 50;
+            } else {
+                document.getElementById('examResultTitle').textContent = "💪 CẦN CỐ GẮNG HƠN";
+                document.getElementById('examFeedback').textContent = "Hãy dành thêm thời gian ôn lại các thẻ Flashcard nhé!";
+                xp += 10;
+            }
+            saveStorage();
+        }
+
+        function resetExam() {
+            document.getElementById('examResultBox').style.display = 'none';
+            document.getElementById('examStartBox').style.display = 'block';
+        }
+
+        function addNewWord() {
+            const word = document.getElementById('newWord').value.trim();
+            const phonetic = document.getElementById('newPhonetic').value.trim();
+            const meaning = document.getElementById('newMeaning').value.trim();
+            const example = document.getElementById('newExample').value.trim();
+            const topic = document.getElementById('newTopicSelect').value;
+
+            if (!word || !meaning) {
+                alert("Vui lòng nhập Từ mới và Nghĩa tiếng Việt!");
+                return;
+            }
+
+            vocabData[currentLang].push({ word, phonetic, meaning, example, topic, box: 1 });
+            saveStorage();
+
+            document.getElementById('newWord').value = '';
+            document.getElementById('newPhonetic').value = '';
+            document.getElementById('newMeaning').value = '';
+            document.getElementById('newExample').value = '';
+
+            alert("✅ Đã thêm từ mới vào chủ đề!");
+            renderVocabList();
+            renderCard();
+        }
+
+        function renderVocabList() {
+            const list = vocabData[currentLang];
+            const container = document.getElementById('vocabList');
+            container.innerHTML = `<h3 style="margin-bottom: 12px; font-size: 16px;">📚 Từ vựng của bạn (${list.length} từ)</h3>`;
+
+            list.forEach((item, idx) => {
+                container.innerHTML += `
+                    <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${item.word}</strong> <small style="color: var(--text-sub);">${item.phonetic || ''}</small>
+                            <div style="font-size: 13px; color: var(--primary);">${item.meaning}</div>
+                            <span style="font-size: 10px; background: var(--primary-light); color: var(--primary); padding: 2px 6px; border-radius: 4px;">${item.topic || 'Khác'}</span>
+                        </div>
+                        <button style="border: none; background: #fee2e2; color: #ef4444; padding: 6px 10px; border-radius: 6px; cursor: pointer;" onclick="deleteWord(${idx})">Xóa</button>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteWord(idx) {
+            vocabData[currentLang].splice(idx, 1);
+            saveStorage();
+            renderVocabList();
+            renderCard();
+        }
+
+        // Khởi chạy ban đầu
+        renderTopics();
+        renderCard();
+        updateDashboard();
+    </script>
+</body>
+</html>
